@@ -2,11 +2,11 @@ package broker
 
 import (
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/SamMHD/simple-broker/pb"
 	"github.com/SamMHD/simple-broker/util"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -28,13 +28,14 @@ func (server *Server) Start() {
 	fmt.Println("Starting server...")
 	lis, err := net.Listen("tcp", server.config.BrokerAddress)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatal().Str("service", "DESTINATION").Msgf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
+	logger := grpc.UnaryInterceptor(util.NewGrpcLoggerForService("destination_service"))
+	s := grpc.NewServer(logger)
 	pb.RegisterBrokerServiceServer(s, server)
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatal().Str("service", "DESTINATION").Msgf("failed to serve: %v", err)
 	}
 }

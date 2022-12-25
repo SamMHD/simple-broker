@@ -1,8 +1,6 @@
 package receiver
 
 import (
-	"fmt"
-
 	"github.com/SamMHD/simple-broker/pb"
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +17,6 @@ func (server *Server) forwardMessage(ctx *gin.Context) {
 	}
 
 	_, err := server.brokerClient.TransferMessage(ctx, &pb.TransferMessageRequest{Message: request.Message})
-	fmt.Println(err)
 	if err != nil {
 		ctx.JSON(500, errorResponse(err))
 		return

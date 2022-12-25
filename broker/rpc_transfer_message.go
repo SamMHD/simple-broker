@@ -26,7 +26,6 @@ func (server *Server) TransferMessage(ctx context.Context, request *pb.TransferM
 	client := pb.NewDestinationServiceClient(conn)
 	_, err = client.ProccessMessage(ctx, &pb.ProccessMessageRequest{Message: request.Message})
 	if err != nil {
-		fmt.Println("Error", err)
 		return nil, status.Errorf(codes.Internal, "failed to call remote procedure: %s", err)
 	}
 

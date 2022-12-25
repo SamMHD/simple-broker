@@ -3,6 +3,7 @@ package receiver
 import (
 	"github.com/SamMHD/simple-broker/pb"
 	"github.com/SamMHD/simple-broker/util"
+	ginzerolog "github.com/dn365/gin-zerolog"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
@@ -30,7 +31,9 @@ func NewServer(config util.Config) (*Server, error) {
 }
 
 func (server *Server) setupRouter() {
-	router := gin.Default()
+	router := gin.New()
+	router.Use(ginzerolog.Logger("gin"))
+	router.Use(gin.Recovery())
 
 	router.POST("/forward", server.forwardMessage)
 
