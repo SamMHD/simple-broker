@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: service_broker.proto
 
-package simple_broker
+package pb
 
 import (
 	context "context"
@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BrokerServiceClient interface {
-	ProccessMessage(ctx context.Context, in *ProccessMessageRequest, opts ...grpc.CallOption) (*ProccessMessageResponse, error)
+	TransferMessage(ctx context.Context, in *TransferMessageRequest, opts ...grpc.CallOption) (*TransferMessageResponse, error)
 }
 
 type brokerServiceClient struct {
@@ -33,9 +33,9 @@ func NewBrokerServiceClient(cc grpc.ClientConnInterface) BrokerServiceClient {
 	return &brokerServiceClient{cc}
 }
 
-func (c *brokerServiceClient) ProccessMessage(ctx context.Context, in *ProccessMessageRequest, opts ...grpc.CallOption) (*ProccessMessageResponse, error) {
-	out := new(ProccessMessageResponse)
-	err := c.cc.Invoke(ctx, "/pb.BrokerService/ProccessMessage", in, out, opts...)
+func (c *brokerServiceClient) TransferMessage(ctx context.Context, in *TransferMessageRequest, opts ...grpc.CallOption) (*TransferMessageResponse, error) {
+	out := new(TransferMessageResponse)
+	err := c.cc.Invoke(ctx, "/pb.BrokerService/TransferMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *brokerServiceClient) ProccessMessage(ctx context.Context, in *ProccessM
 // All implementations must embed UnimplementedBrokerServiceServer
 // for forward compatibility
 type BrokerServiceServer interface {
-	ProccessMessage(context.Context, *ProccessMessageRequest) (*ProccessMessageResponse, error)
+	TransferMessage(context.Context, *TransferMessageRequest) (*TransferMessageResponse, error)
 	mustEmbedUnimplementedBrokerServiceServer()
 }
 
@@ -54,8 +54,8 @@ type BrokerServiceServer interface {
 type UnimplementedBrokerServiceServer struct {
 }
 
-func (UnimplementedBrokerServiceServer) ProccessMessage(context.Context, *ProccessMessageRequest) (*ProccessMessageResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ProccessMessage not implemented")
+func (UnimplementedBrokerServiceServer) TransferMessage(context.Context, *TransferMessageRequest) (*TransferMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TransferMessage not implemented")
 }
 func (UnimplementedBrokerServiceServer) mustEmbedUnimplementedBrokerServiceServer() {}
 
@@ -70,20 +70,20 @@ func RegisterBrokerServiceServer(s grpc.ServiceRegistrar, srv BrokerServiceServe
 	s.RegisterService(&BrokerService_ServiceDesc, srv)
 }
 
-func _BrokerService_ProccessMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProccessMessageRequest)
+func _BrokerService_TransferMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransferMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BrokerServiceServer).ProccessMessage(ctx, in)
+		return srv.(BrokerServiceServer).TransferMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.BrokerService/ProccessMessage",
+		FullMethod: "/pb.BrokerService/TransferMessage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BrokerServiceServer).ProccessMessage(ctx, req.(*ProccessMessageRequest))
+		return srv.(BrokerServiceServer).TransferMessage(ctx, req.(*TransferMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -96,8 +96,8 @@ var BrokerService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*BrokerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ProccessMessage",
-			Handler:    _BrokerService_ProccessMessage_Handler,
+			MethodName: "TransferMessage",
+			Handler:    _BrokerService_TransferMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

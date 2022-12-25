@@ -10,10 +10,8 @@ import (
 	"github.com/SamMHD/simple-broker/util"
 )
 
-const TPS = 10000
+const TPS = 1
 const testDuration = 10
-
-var config util.Config
 
 // StartSendProcedure will send messages at a rate of TPS for testDuration seconds
 func StartSendProcedure(config util.Config) {

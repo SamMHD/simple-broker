@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pb;
+
+import "rpc_transfer_message.proto";
+
+option go_package = "github.com/SamMHD/simple-broker/pb";
+
+service BrokerService {
+    rpc TransferMessage (TransferMessageRequest) returns (TransferMessageResponse) {}
+}

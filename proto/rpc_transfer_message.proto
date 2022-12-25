@@ -4,9 +4,8 @@ package pb;
 
 option go_package = "github.com/SamMHD/simple-broker/pb";
 
-message ProccessMessageRequest {
+message TransferMessageRequest {
     string message = 1;
 }
 
-message ProccessMessageResponse {
-}
+message TransferMessageResponse {}
