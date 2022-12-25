@@ -11,7 +11,6 @@ type Config struct {
 	MessageMaxSize int `mapstructure:"MESSAGE_MAX_SIZE"`
 
 	ReceiverAddress string `mapstructure:"RECEIVER_ADDRESS"`
-	ReceiverPort    string `mapstructure:"RECEIVER_PORT"`
 }
 
 // LoadConfig reads configuration from file or environment variables.

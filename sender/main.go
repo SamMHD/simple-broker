@@ -15,16 +15,8 @@ const testDuration = 10
 
 var config util.Config
 
-func init() {
-	var err error
-	config, err = util.LoadConfig(".")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 // StartSendProcedure will send messages at a rate of TPS for testDuration seconds
-func StartSendProcedure() {
+func StartSendProcedure(config util.Config) {
 	// send messages at a rate of TPS for testDuration seconds
 	for start := time.Now(); time.Since(start) < time.Second*testDuration; {
 		// send a message

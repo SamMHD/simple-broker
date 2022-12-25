@@ -20,12 +20,8 @@ func sendMessage(config util.Config) error {
 	}
 
 	// send the message to the receiver over HTTP API
-	err = sendHTTPMessage(config.ReceiverAddress, config.ReceiverPort, message)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	err = sendHTTPMessage(config.ReceiverAddress, message)
+	return err
 }
 
 // generateRandomMessage generate a random english message of size between minSize and maxSize
@@ -48,20 +44,19 @@ func generateRandomMessage(minSize int, maxSize int) (message string, err error)
 
 // messageRequest is the request body of the HTTP API
 type messageRequest struct {
-	message string `json:message`
+	Message string `json:"message"`
 }
 
 // sendHTTPMessage encodes message into JSON and send it to the receiver over HTTP API
-func sendHTTPMessage(receiverAddress string, receiverPort string, message string) error {
+func sendHTTPMessage(receiverAddress string, message string) error {
 	// create the request body
-	requestBody, err := json.Marshal(messageRequest{message: message})
+	requestBody, err := json.Marshal(messageRequest{Message: message})
 	if err != nil {
 		return err
 	}
 
 	// send the request
 	bodyReader := bytes.NewReader(requestBody)
-	_, err = http.Post("http://"+receiverAddress+":"+receiverPort+"/message", "application/json", bodyReader)
-
-	return nil
+	_, err = http.Post("http://"+receiverAddress+"/forward", "application/json", bodyReader)
+	return err
 }
