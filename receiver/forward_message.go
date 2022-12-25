@@ -1,6 +1,8 @@
 package receiver
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 type forwardMessageRequest struct {
 	Message string `json:"message" binding:"required"`
@@ -14,4 +16,5 @@ func (s *Server) forwardMessage(ctx *gin.Context) {
 	}
 
 	// TODO: send message over gRPC
+	// fmt.Println("Received:", request.Message)
 }

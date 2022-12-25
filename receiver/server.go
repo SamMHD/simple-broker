@@ -12,7 +12,7 @@ type Server struct {
 }
 
 // NewServer creates a new HTTP server and set up routing.
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config) (*Server, error) {
 	server := &Server{
 		config: config,
 	}
@@ -30,8 +30,8 @@ func (server *Server) setupRouter() {
 }
 
 // Start runs the HTTP server on a specific address.
-func (server *Server) Start(address string) error {
-	return server.router.Run(address)
+func (server *Server) Start() error {
+	return server.router.Run(server.config.ReceiverAddress)
 }
 
 func errorResponse(err error) gin.H {
