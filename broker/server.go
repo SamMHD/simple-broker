@@ -12,8 +12,10 @@ import (
 )
 
 type Server struct {
+	destinationClient pb.DestinationServiceClient
+	config            util.Config
+
 	pb.UnimplementedBrokerServiceServer
-	config util.Config
 }
 
 func NewServer(config util.Config) (*Server, error) {
@@ -24,18 +26,44 @@ func NewServer(config util.Config) (*Server, error) {
 	return server, nil
 }
 
-func (server *Server) Start() {
-	fmt.Println("Starting server...")
-	lis, err := net.Listen("tcp", server.config.BrokerAddress)
+func (server *Server) DialDestinationRPC() error {
+	log.Info().Str("ser_name", "broker").Msg("Trying to dial Destination RPC...")
+
+	conn, err := grpc.Dial(server.config.DestinationAddress, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal().Str("service", "DESTINATION").Msgf("failed to listen: %v", err)
+		return err
 	}
 
-	logger := grpc.UnaryInterceptor(util.NewGrpcLoggerForService("destination_service"))
+	server.destinationClient = pb.NewDestinationServiceClient(conn)
+	log.Info().Str("ser_name", "broker").Msg("Connection to Destination RPC established.")
+	return nil
+}
+
+func (server *Server) StartGrpcServer() error {
+	log.Info().Str("ser_name", "broker").Msg("Starting gRPC server...")
+
+	lis, err := net.Listen("tcp", server.config.BrokerAddress)
+	if err != nil {
+		return fmt.Errorf("failed to listen: %v", err)
+	}
+
+	logger := grpc.UnaryInterceptor(util.NewGrpcLoggerForService("broker"))
+
 	s := grpc.NewServer(logger)
+
 	pb.RegisterBrokerServiceServer(s, server)
 	reflection.Register(s)
-	if err := s.Serve(lis); err != nil {
-		log.Fatal().Str("service", "DESTINATION").Msgf("failed to serve: %v", err)
+
+	return s.Serve(lis)
+}
+
+func (server *Server) Start() {
+	err := server.DialDestinationRPC()
+	if err != nil {
+		log.Fatal().Str("ser_name", "broker").Msgf("failed to dial destination: %s", err)
+	}
+
+	if err := server.StartGrpcServer(); err != nil {
+		log.Fatal().Str("ser_name", "broker").Msgf("failed to serve: %v", err)
 	}
 }
