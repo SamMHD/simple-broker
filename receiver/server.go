@@ -5,6 +5,7 @@ import (
 	"github.com/SamMHD/simple-broker/util"
 	ginzerolog "github.com/dn365/gin-zerolog"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 )
 
@@ -41,18 +42,21 @@ func (server *Server) setupRouter() {
 }
 
 func (server *Server) connectBrokerClient() error {
+	log.Info().Str("ser_name", "receiver").Msg("Trying to dial Broker RPC...")
+
 	conn, err := grpc.Dial(server.config.BrokerAddress, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
-	// TODO: defer conn.Close()
 
 	server.brokerClient = pb.NewBrokerServiceClient(conn)
+	log.Info().Str("ser_name", "receiver").Msg("Connection to Broker RPC established.")
 	return nil
 }
 
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start() error {
+	log.Info().Str("ser_name", "receiver").Msg("Starting gin server...")
 	return server.router.Run(server.config.ReceiverAddress)
 }
 
