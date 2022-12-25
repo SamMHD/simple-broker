@@ -42,7 +42,7 @@ func NewGrpcLoggerForService(serviceName string) func(
 			Int("status_code", int(statusCode)).
 			Str("status_text", statusCode.String()).
 			Dur("duration", duration).
-			Msg("received a gRPC request")
+			Msg("gRPC Request")
 
 		return result, err
 	}
