@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "github.com/SamMHD/simple-broker";
+
+message ProccessMessageRequest {
+    string message = 1;
+}
+
+message ProccessMessageResponse {
+    int32 status = 1;
+}
