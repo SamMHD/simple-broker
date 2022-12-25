@@ -39,9 +39,9 @@ func NewGrpcLoggerForService(serviceName string) func(
 		logger.Str("protocol", "grpc").
 			Str("method", info.FullMethod).
 			Str("ser_name", serviceName).
-			Int("status_code", int(statusCode)).
-			Str("status_text", statusCode.String()).
-			Dur("duration", duration).
+			Int("status", int(statusCode)).
+			Str("status_reason", statusCode.String()).
+			Dur("resp_time", duration).
 			Msg("gRPC Request")
 
 		return result, err
