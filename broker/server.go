@@ -99,17 +99,20 @@ func (server *Server) StartGrpcServer() error {
 // Start dials destination gRPC server and starts the gRPC server for the Broker.
 // it will block the current thread until the server is stopped.
 // in case of an error, it returns the error and in case of peacefull shutdown, it returns nil.
-func (server *Server) Start() {
+func (server *Server) Start() error {
 	// dial the destination service gRPC server
 	err := server.DialDestinationRPC()
 	if err != nil {
 		// if there is an error, log it using main logger and return
 		log.Error().Str("ser_name", "broker").Err(err).Msg("failed to dial destination")
+		return err
 	}
 
-	// start the gRPC server
-	if err := server.StartGrpcServer(); err != nil {
+	// start gRPC server
+	err = server.StartGrpcServer()
+	if err != nil {
 		// if there is an error, log it using main logger and return
-		log.Error().Str("ser_name", "broker").Err(err).Msg("failed to serve")
+		log.Error().Str("ser_name", "broker").Err(err).Msg("failed to listen")
 	}
+	return err
 }
