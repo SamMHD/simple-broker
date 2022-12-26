@@ -4,6 +4,8 @@
 package sender
 
 import (
+	"fmt"
+	"sync"
 	"time"
 
 	"github.com/SamMHD/simple-broker/util"
@@ -12,23 +14,43 @@ import (
 )
 
 const TPS = 10000
-const testDuration = 10
+const testDuration = 2
 
 // StartSendProcedure will send messages at a rate of TPS for testDuration seconds
 
 func StartSendProcedure(config util.Config) {
 	// send messages at a rate of TPS for testDuration seconds
 	i := 0
+
+	// new wait group
+	var wg sync.WaitGroup
+	f := 0
+
 	for start := time.Now(); time.Since(start) < time.Second*testDuration; {
 		// send a message
 		log.Info().Msgf("sending message %d", i)
 		i++
-		err := sendMessage(config)
-		if err != nil {
-			log.Fatal().Msgf("%s", err)
+		if i%1000 == 0 {
+			fmt.Println("Performing", i, "th message")
 		}
+
+		wg.Add(1)
+		go func() {
+			err := sendMessage(config)
+			if err != nil {
+				fmt.Println("error")
+				log.Error().Str("ser_name", "sender").Msgf("%s", err)
+			}
+			wg.Done()
+			f++
+			if f%1000 == 0 {
+				fmt.Println("Received", f, "th message")
+			}
+		}()
 
 		// sleep for 1/TPS seconds
 		time.Sleep(time.Second / TPS)
 	}
+	fmt.Println("here")
+	wg.Wait()
 }
