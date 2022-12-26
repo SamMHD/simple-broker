@@ -6,6 +6,7 @@ import (
 
 	"github.com/SamMHD/simple-broker/pb"
 	"github.com/SamMHD/simple-broker/util"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -14,6 +15,7 @@ import (
 type Server struct {
 	destinationClient pb.DestinationServiceClient
 	config            util.Config
+	logger            zerolog.Logger
 
 	pb.UnimplementedBrokerServiceServer
 }
@@ -21,6 +23,7 @@ type Server struct {
 func NewServer(config util.Config) (*Server, error) {
 	server := &Server{
 		config: config,
+		logger: NewLogger(),
 	}
 
 	return server, nil
