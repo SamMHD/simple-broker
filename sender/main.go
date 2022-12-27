@@ -12,8 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const TPS = 1000
-const testDuration = 20
+const TPS = 1000        // messages per second
+const testDuration = 20 // duration in which the sender will send messages in rate of TPS
 
 // StartSendProcedure will send messages at a rate of TPS for testDuration seconds
 func StartSendProcedure(config util.Config) {
