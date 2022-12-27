@@ -41,7 +41,7 @@ build-receiver: create-bin-folder
 	@echo "Build Done!"
 	@echo
 
-run-receiver: build-Receiver
+run-receiver: build-receiver
 	./bin/receiver $(ARGS)
 #################### Receiver PACKAGE ####################
 
