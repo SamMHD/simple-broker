@@ -43,6 +43,12 @@ func StartSendProcedure(config util.Config) {
 
 	// wait for all requests to finish
 	wg.Wait()
+	// log that all requests have finished
+	log.Warn().Str("ser_name", "sender").Msg("Sending Requests Finished, Other Services might still be running")
+	// NOTE: after this point, the sender will not send any more messages and current goroutine will exit immediately
+	//       but other services might still be running (in case of building them using TargetService set to "all")
+	// 	     to stop all services, use Ctrl+C or uncomment the following line
+	// os.Exit(0)
 }
 
 // send will send a message to the receiver and wait for a response
