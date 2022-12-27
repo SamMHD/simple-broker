@@ -26,13 +26,13 @@ func SetGlobalLogSettings(logType, logLevel string) {
 	// set log level
 	switch logLevel {
 	case "debug":
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Logger = log.Logger.Level(zerolog.DebugLevel)
 	case "info":
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		log.Logger = log.Logger.Level(zerolog.InfoLevel)
 	case "warn":
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+		log.Logger = log.Logger.Level(zerolog.WarnLevel)
 	case "error":
-		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+		log.Logger = log.Logger.Level(zerolog.ErrorLevel)
 	default:
 		// invalid log level
 		fmt.Printf("invalid log level: %s\n", logLevel)
