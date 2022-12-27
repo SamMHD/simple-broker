@@ -64,7 +64,7 @@ func (server *Server) connectBrokerClient() error {
 	log.Info().Str("ser_name", "receiver").Msg("Trying to dial Broker RPC...")
 
 	// create a new gRPC connection to the Broker
-	conn, err := grpc.Dial(server.config.BrokerAddress, grpc.WithInsecure())
+	conn, err := grpc.Dial(server.config.BrokerAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return err
 	}
