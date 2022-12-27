@@ -4,7 +4,6 @@
 package sender
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -13,44 +12,59 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const TPS = 10000
-const testDuration = 2
+const TPS = 1000
+const testDuration = 20
 
 // StartSendProcedure will send messages at a rate of TPS for testDuration seconds
-
 func StartSendProcedure(config util.Config) {
-	// send messages at a rate of TPS for testDuration seconds
-	i := 0
+	reqCounter := 0       // counts number of sent requests
+	resCounter := 0       // counts number of received responses
+	var wg sync.WaitGroup // wait group to wait for all requests to finish
 
-	// new wait group
-	var wg sync.WaitGroup
-	f := 0
-
+	// send messages for testDuration seconds
+	// NOTE: the test might take more than testDuration seconds to finish
+	//	     because of the time it takes to receive responses
 	for start := time.Now(); time.Since(start) < time.Second*testDuration; {
-		// send a message
-		log.Info().Msgf("sending message %d", i)
-		i++
-		if i%1000 == 0 {
-			fmt.Println("Performing", i, "th message")
+		// increment the request counter
+		reqCounter++
+		// if the request counter is a multiple of 1000, logs the number of sent messages
+		if reqCounter%1000 == 0 {
+			log.Warn().Str("ser_name", "sender").Msgf("Sending %dth Request", reqCounter)
 		}
 
 		wg.Add(1)
-		go func() {
-			err := sendMessage(config)
-			if err != nil {
-				fmt.Println("error")
-				log.Error().Str("ser_name", "sender").Msgf("%s", err)
-			}
-			wg.Done()
-			f++
-			if f%1000 == 0 {
-				fmt.Println("Received", f, "th message")
-			}
-		}()
+		go send(config, &resCounter, &wg)
 
 		// sleep for 1/TPS seconds
 		time.Sleep(time.Second / TPS)
+		// NOTE: this might cause the sender to send less than TPS messages per second
+		//       because of the time it takes to send a message
 	}
-	fmt.Println("here")
+
+	// wait for all requests to finish
 	wg.Wait()
+}
+
+// send will send a message to the receiver and wait for a response
+// if there is an error, it will try to send the message again
+// else it will retry sending the message via scheduling a new goroutine
+func send(config util.Config, resCounter *int, wg *sync.WaitGroup) {
+	// send an arbitrary message to the receiver
+	err := sendMessage(config)
+	if err != nil {
+		// if there is an error, log the error and try to send the message again
+		log.Debug().Str("ser_name", "sender").Msgf("%s", err)
+		go send(config, resCounter, wg)
+		// make sure to return to close current goroutine
+		return
+	}
+
+	// if there is no error, increment the response counter and decrement the wait group
+	wg.Done()
+	(*resCounter)++
+
+	// if the response counter is a multiple of 1000, logs the number of received messages
+	if *resCounter%1000 == 0 {
+		log.Warn().Str("ser_name", "sender").Msgf("Received %dth Response", *resCounter)
+	}
 }
