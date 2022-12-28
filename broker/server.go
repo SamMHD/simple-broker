@@ -140,12 +140,13 @@ func (server *Server) Stop() (err error) {
 	defer func() {
 		if recover() != nil {
 			// server.destinationConn.Close()
-			err = fmt.Errorf("failed to gRPC server peacefully")
+			err = fmt.Errorf("failed to stop gRPC server peacefully")
 		}
 	}()
 	log.Info().Str("ser_name", "broker").Msg("Stopping gRPC server...")
 	server.cancelContext()
 	server.grpcServer.Stop()
 	err = server.destinationConn.Close()
+	log.Info().Str("ser_name", "broker").Msg("Stopped gRPC server")
 	return
 }
