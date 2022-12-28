@@ -15,6 +15,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -66,7 +67,11 @@ func (server *Server) DialDestinationRPC() error {
 
 	// dial the destination service gRPC server
 	var err error
-	server.destinationConn, err = grpc.Dial(server.config.DestinationAddress, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second))
+	server.destinationConn, err = grpc.Dial(
+		server.config.DestinationAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(), grpc.WithTimeout(2*time.Second),
+	)
 	if err != nil {
 		// if there is an error, log it using main logger and return
 		log.Error().Str("ser_name", "broker").Msgf("failed to dial Destination RPC: %s", err)
