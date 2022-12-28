@@ -37,5 +37,5 @@ func newLogger(destination string) (zerolog.Logger, error) {
 	}
 
 	// if there is no error, create a new logger with the file as destination
-	return zerolog.New(file).With().Timestamp().Logger(), nil
+	return zerolog.New(file).Level(zerolog.InfoLevel), nil
 }
