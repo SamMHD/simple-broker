@@ -13,7 +13,7 @@ func (server *Server) TransferMessage(ctx context.Context, request *pb.TransferM
 	server.logger.Info().Str("ser_name", "broker_service").Str("passing_message", request.Message).Msg("Recieved Message")
 
 	// after logging the message, it fires a new goroutine to forward the message to the destination service.
-	go server.transferMessageToBroker(request.Message)
+	go server.transferMessageToBroker(server.ctx, request.Message)
 	// return a healthy empty response to the RPC caller
 	return &pb.TransferMessageResponse{}, nil
 }
@@ -21,13 +21,16 @@ func (server *Server) TransferMessage(ctx context.Context, request *pb.TransferM
 // TODO: follow-id and status endpoint
 
 // transferMessageToBroker forwards the message to the destination service using gRPC.
-func (server *Server) transferMessageToBroker(message string) {
-	// call the remote procedure
-	// and create a new background context beacuse we don't need to cancel.
-	// WARNING: this is a blocking call, so it will block the current goroutine.
-	// WARNING: if the destination service is down or not responding, this will block
-	// the current goroutine forever and it may cause memory leak.
-	_, err := server.destinationClient.ProccessMessage(context.Background(), &pb.ProccessMessageRequest{Message: message})
+func (server *Server) transferMessageToBroker(ctx context.Context, message string) {
+
+	// check if server context is done
+	if ctx.Err() != nil {
+		// if it is done, log it using the main logger
+		log.Error().Str("ser_name", "broker_service").Msg("canceling message transfer. server context is done.")
+	}
+
+	// call the remote procedure using the gRPC client
+	_, err := server.destinationClient.ProccessMessage(ctx, &pb.ProccessMessageRequest{Message: message})
 	if err != nil {
 		// if the RPC call returns an error, log it using the main logger
 		log.Error().Str("ser_name", "broker_service").Err(err).Msg("failed to call remote procedure")
