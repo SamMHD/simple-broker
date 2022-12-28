@@ -15,7 +15,7 @@ var testConfig util.Config = util.Config{
 	DestinationAddress: "localhost:8088",
 }
 
-func TestNewServer(t *testing.T) {
+func TestNewDestinationServer(t *testing.T) {
 
 	testCases := []struct {
 		name    string
