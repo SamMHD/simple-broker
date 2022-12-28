@@ -27,6 +27,7 @@ func (server *Server) transferMessageToDestination(ctx context.Context, message 
 	if ctx.Err() != nil {
 		// if it is done, log it using the main logger
 		log.Error().Str("ser_name", "broker_service").Msg("canceling message transfer. server context is done.")
+		return
 	}
 
 	// call the remote procedure using the gRPC client
