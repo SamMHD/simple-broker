@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewLogger(t *testing.T) {
+func TestNewBrokerLogger(t *testing.T) {
 	testCases := []struct {
 		name    string
 		prepare func() string
