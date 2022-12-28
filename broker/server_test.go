@@ -1,17 +1,17 @@
 package broker
 
-// WARNING: port 8088-8090 is used in this test, so make sure it's not used by any other process.
-
 import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/SamMHD/simple-broker/destination"
 	"github.com/SamMHD/simple-broker/util"
+	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,28 +20,49 @@ var testDestinationServiceRunning sync.Mutex
 func prepareDestinationServiceForTest(config util.Config, t *testing.T) context.CancelFunc {
 	testDestinationServiceRunning.Lock()
 	ctx, cancel := context.WithCancel(context.Background())
+
 	server, err := destination.NewServer(config)
 	require.NoError(t, err)
+
+	safeCancel := context.CancelFunc(func() {
+		if ctx.Err() == nil {
+			cancel()
+		}
+	})
+
 	go func() {
 		err := server.Start()
-		testDestinationServiceRunning.Unlock()
+		safeCancel()
 		require.NoError(t, err)
 	}()
+
 	go func() {
 		<-ctx.Done()
 		server.Stop()
 		testDestinationServiceRunning.Unlock()
 	}()
-	return cancel
+
+	return safeCancel
 }
 
-var testConfig util.Config = util.Config{
-	DestinationAddress:   "localhost:8088",
-	BrokerAddress:        "localhost:8089",
+func setConfigPorts(config util.Config) util.Config {
+	brokerPort, _ := freeport.GetFreePort()
+	config.BrokerAddress = strings.ReplaceAll(config.BrokerAddress, "<PORT>", fmt.Sprint(brokerPort))
+
+	desPort, _ := freeport.GetFreePort()
+	config.DestinationAddress = strings.ReplaceAll(config.DestinationAddress, "<PORT>", fmt.Sprint(desPort))
+
+	return config
+}
+
+var rawTestConfig util.Config = util.Config{
+	DestinationAddress:   "localhost:<PORT>",
+	BrokerAddress:        "localhost:<PORT>",
 	BrokerLogDestination: "./test.log",
 }
 
 func TestNewBrokerServer(t *testing.T) {
+	testConfig := setConfigPorts(rawTestConfig)
 	stopDesServer := prepareDestinationServiceForTest(testConfig, t)
 	defer stopDesServer()
 
@@ -101,7 +122,7 @@ func TestNewBrokerServer(t *testing.T) {
 			name: "invalid_broker_address_port_busy",
 			prepare: func() util.Config {
 				config := testConfig
-				config.BrokerAddress = "localhost:8088"
+				config.BrokerAddress = config.DestinationAddress
 				return config
 			},
 			judge: func(server *Server, err error) error {
@@ -127,8 +148,7 @@ func TestNewBrokerServer(t *testing.T) {
 		{
 			name: "invalid_destination_address",
 			prepare: func() util.Config {
-				config := testConfig
-				config.DestinationAddress = "localhost:8090"
+				config := setConfigPorts(rawTestConfig)
 				return config
 			},
 			judge: func(server *Server, err error) error {

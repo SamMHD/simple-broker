@@ -11,6 +11,7 @@ import (
 
 func TestTransferMessage(t *testing.T) {
 
+	testConfig := setConfigPorts(rawTestConfig)
 	stopDesServer := prepareDestinationServiceForTest(testConfig, t)
 	defer stopDesServer()
 

@@ -1,18 +1,17 @@
 package destination
 
-// WARNING: port 8088 is used in this test, so make sure it's not used by any other process.
-
 import (
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/SamMHD/simple-broker/util"
+	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/require"
 )
 
 var testConfig util.Config = util.Config{
-	DestinationAddress: "localhost:8088",
+	DestinationAddress: fmt.Sprintf("localhost:%d", freeport.GetPort()),
 }
 
 func TestNewDestinationServer(t *testing.T) {
