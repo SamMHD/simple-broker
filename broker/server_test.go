@@ -3,6 +3,7 @@ package broker
 // WARNING: port 8088-8090 is used in this test, so make sure it's not used by any other process.
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -16,15 +17,22 @@ import (
 
 var testDestinationServiceRunning sync.Mutex
 
-func prepareDestinationServiceForTest(config util.Config, t *testing.T) {
+func prepareDestinationServiceForTest(config util.Config, t *testing.T) context.CancelFunc {
 	testDestinationServiceRunning.Lock()
+	ctx, cancel := context.WithCancel(context.Background())
 	server, err := destination.NewServer(config)
 	require.NoError(t, err)
 	go func() {
 		err := server.Start()
+		testDestinationServiceRunning.Unlock()
 		require.NoError(t, err)
+	}()
+	go func() {
+		<-ctx.Done()
+		server.Stop()
 		testDestinationServiceRunning.Unlock()
 	}()
+	return cancel
 }
 
 var testConfig util.Config = util.Config{
@@ -33,8 +41,9 @@ var testConfig util.Config = util.Config{
 	BrokerLogDestination: "./test.log",
 }
 
-func TestNewServer(t *testing.T) {
-	prepareDestinationServiceForTest(testConfig, t)
+func TestNewBrokerServer(t *testing.T) {
+	stopDesServer := prepareDestinationServiceForTest(testConfig, t)
+	defer stopDesServer()
 
 	testCases := []struct {
 		name    string
