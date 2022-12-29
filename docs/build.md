@@ -20,7 +20,7 @@ also 'make build' is shorthand for 'make build-all'
 
 ## 🐳 Dockerfile
 
-You can easily build image containing all the services (same as ``make build`).
+You can easily build image containing all the services (same as ```make build```).
 **Note!!** don't forget to expose desired port in Dockerfile
 
 ```
