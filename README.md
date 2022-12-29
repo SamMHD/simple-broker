@@ -4,6 +4,8 @@
 
 _Experimental project for GraphInc. job interview._
 
+[![Build Status](https://github.com/SamMHD/simple-broker/workflows/Go%20Build%20and%20Test/badge.svg)](https://github.com/SamMHD/simple-broker/actions)[![Build Status](https://github.com/SamMHD/simple-broker/workflows/Docker%20Image%20CI/badge.svg)](https://github.com/SamMHD/simple-broker/actions)
+
 Simple Broker is a golang based super simple message broking system which contains four different subpackages.
 
 - 🚀 **Broker Service**: this service serves a gRPC server and will receive messages, log them, and forward them to the destination service in the background
